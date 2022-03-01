@@ -1,0 +1,39 @@
+name: Build i2c-tools
+
+on:
+  push:
+    branches:
+      - master
+      - cicd
+  pull_request:
+    branches:
+      - master
+
+env:
+  xcompile_vars: 'CC=arm-linux-musleabihf-gcc CXX=arm-linux-musleabihf-g++ INCLUDE="-I/usr/arm-linux-musleabihf/include/"'
+
+jobs:
+  build-i2c-tools:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up cross-compiler
+      run: |
+        pwd
+        wget https://musl.cc/arm-linux-musleabihf-cross.tgz
+        tar -zxf arm-linux-musleabihf-cross.tgz
+        sudo cp -r arm-linux-musleabihf-cross/* /usr/
+
+    - name: Compile i2c-tools
+      run: |
+        sudo make ${{ env.xcompile_vars }}
+    
+    - name: Upload i2c-tools binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: i2c-tools
+        path: |
+          ./tools/
+          !./tools/*.*
